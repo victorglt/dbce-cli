@@ -9,6 +9,8 @@ import (
 const Version = "0.1"
 
 func main() {
+	SetupConfig()
+
 	app := cli.NewApp()
 
 	app.Name = "dbce-cli"
@@ -17,7 +19,7 @@ func main() {
 	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
-		userapiv0.GetQuotesCommand(),
+		quotes.GetQuotesCommand(),
 	}
 
 	app.Run(os.Args)

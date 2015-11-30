@@ -1,22 +1,38 @@
-package userapiv0
+package quotes
 
 import (
 	"github.com/codegangsta/cli"
+	"io/ioutil"
+	"net/http"
 )
 
-type Interval struct {
-  
-}
+const (
+	url          = "https://api.cloud.exchange/v0"
+	getQuotesUrl = "/get-fixed-quotes"
+)
 
-type QuotesRequest struct {
-  Interval, Quantities, osTypes
+func LogError(err error) {
+	if err != nil {
+		println(err)
+	}
 }
-
 
 func GetQuotesRequest(c *cli.Context) {
 
 	println("Sending Request....")
-	println("Args:", c.Args())
+
+	resp, err := http.Get(url + getQuotesUrl)
+
+	LogError(err)
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	LogError(err)
+
+	println(string(body))
+
 }
 
 func GetQuotesCommand() cli.Command {
