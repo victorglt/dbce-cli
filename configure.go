@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"log"
 	"os"
 	"os/user"
@@ -23,9 +24,7 @@ type Configuration struct {
 
 func WriteConfig(c Configuration) {
 	file, err := os.OpenFile(filePath, os.O_WRONLY, os.ModePerm)
-
 	defer file.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,18 +49,16 @@ func GetConfig() (c *Configuration) {
 
 	r := bufio.NewReader(file)
 
-	result := make([]byte, 100)
-	buffer := make([]byte, 100)
+	var result []byte
+	buffer := make([]byte, 128)
 	for {
-		count, err := r.Read(buffer)
+		count, err := r.Read(buffer[0:])
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			log.Fatal(err)
 		}
-
-		if count == 0 {
-			break
-		}
-
 		println(count)
 		println("fuuu")
 		result = append(result, buffer[0:count]...)
