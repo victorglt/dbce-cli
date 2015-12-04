@@ -22,7 +22,7 @@ type Configuration struct {
 	Url string
 }
 
-func WriteConfig(c Configuration) {
+func WriteConfig(c *Configuration) {
 	file, err := os.OpenFile(filePath, os.O_WRONLY, os.ModePerm)
 	defer file.Close()
 	if err != nil {
@@ -68,7 +68,7 @@ func GetConfig() (c *Configuration) {
 	return &config
 }
 
-func SetupConfig() {
+func SetupConfig() (c *Configuration) {
 
 	user, err := user.Current()
 
@@ -93,4 +93,5 @@ func SetupConfig() {
 		}
 
 	}
+	return GetConfig()
 }
