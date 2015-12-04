@@ -59,8 +59,6 @@ func GetConfig() (c *Configuration) {
 			}
 			log.Fatal(err)
 		}
-		println(count)
-		println("fuuu")
 		result = append(result, buffer[0:count]...)
 	}
 
