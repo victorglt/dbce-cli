@@ -1,4 +1,4 @@
-package main
+package configuration
 
 import (
 	"bufio"
@@ -15,6 +15,7 @@ const (
 
 var (
 	filePath string
+	Context  *Configuration
 )
 
 type Configuration struct {
@@ -22,14 +23,14 @@ type Configuration struct {
 	Url string
 }
 
-func WriteConfig(c *Configuration) {
+func WriteConfig() {
 	file, err := os.OpenFile(filePath, os.O_WRONLY, os.ModePerm)
 	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	b, err := json.Marshal(c)
+	b, err := json.Marshal(Context)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,12 +64,11 @@ func GetConfig() (c *Configuration) {
 	}
 
 	config := Configuration{}
-	println("unmarshalling")
 	json.Unmarshal(result, &config)
 	return &config
 }
 
-func SetupConfig() (c *Configuration) {
+func SetupConfig() {
 
 	user, err := user.Current()
 
@@ -84,7 +84,7 @@ func SetupConfig() (c *Configuration) {
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			_, err = os.Create(filePath)
+			file, err = os.Create(filePath)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -93,5 +93,5 @@ func SetupConfig() (c *Configuration) {
 		}
 
 	}
-	return GetConfig()
+	Context = GetConfig()
 }

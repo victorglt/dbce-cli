@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/codegangsta/cli"
+	"github.com/victorglt/dbce-cli/configuration"
 	"github.com/victorglt/dbce-cli/userapiv0"
 	"os"
 )
@@ -9,7 +10,7 @@ import (
 const Version = "0.1"
 
 func main() {
-	SetupConfig()
+	configuration.SetupConfig()
 
 	app := cli.NewApp()
 
