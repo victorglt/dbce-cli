@@ -3,9 +3,11 @@ package quotes
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/victorglt/dbce-cli/configuration"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -19,7 +21,13 @@ var (
 
 func LogError(err error) {
 	if err != nil {
-		println(err)
+		log.Println(err)
+	}
+}
+
+func LogFatal(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -38,7 +46,7 @@ type FixedQuoteRequest struct {
 }
 
 type FixedQuote struct {
-	Id         String `json:"id"`
+	Id         string `json:"id"`
 	TotalPrice string `json:"totalPrice"`
 }
 
@@ -48,11 +56,21 @@ type Response struct {
 
 func GetQuotesRequest(c *cli.Context) {
 
-	println(configuration.Context.Url + getQuotesUrl)
+	quant := Quantities{}
+	print("dbce-cli>> Type compute qty (empty): ")
+	fmt.Scanf("%s", &quant.Compute)
+	print("dbce-cli>> Type storage qty (empty): ")
+	fmt.Scanf("%s", &quant.Storage)
+
+	interval := Interval{}
+	print("dbce-cli>> Type start date (yesterday): ")
+	fmt.Scanf("%s", &interval.Start)
+	print("dbce-cli>> Type end date (today): ")
+	fmt.Scanf("%s", &interval.End)
 
 	filter := &FixedQuoteRequest{
-		Quantities: Quantities{Compute: "10", Storage: "10"},
-		Interval:   Interval{Start: "2015-12-08T23:00:00.000Z", End: "2015-12-09T23:00:00.000Z"},
+		Quantities: quant,
+		Interval:   interval,
 	}
 	jsonFilter, err := json.Marshal(&filter)
 
@@ -63,14 +81,14 @@ func GetQuotesRequest(c *cli.Context) {
 
 	resp, err := client.Do(req)
 
-	LogError(err)
+	LogFatal(err)
 
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 
 	//quotes, err := json.Unmarshal(body, Response)
-	LogError(err)
+	LogFatal(err)
 
 	println(string(body))
 
