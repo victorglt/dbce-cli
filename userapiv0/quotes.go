@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 )
 
 const (
@@ -32,41 +34,88 @@ func LogFatal(err error) {
 }
 
 type Interval struct {
-	Start string `json:"start"`
-	End   string `json:"end"`
+	Start string `json:"start, omitempty"`
+	End   string `json:"end, omitempty"`
 }
 
 type Quantities struct {
-	Compute string `json:"compute"`
-	Storage string `json:"storage"`
+	Compute string `json:"compute, omitempty"`
+	Storage string `json:"storage, omitempty"`
+	Memory  string `json:"memory, omitempty"`
 }
+
 type FixedQuoteRequest struct {
-	Quantities Quantities `json:"quantities"`
-	Interval   Interval   `json:"interval"`
+	Quantities *Quantities `json:"quantities, omitempty"`
+	Interval   *Interval   `json:"interval, omitempty"`
 }
 
 type FixedQuote struct {
-	Id         string `json:"id"`
-	TotalPrice string `json:"totalPrice"`
+	Id         string `json:"id, omitempty"`
+	TotalPrice string `json:"totalPrice, omitempty"`
 }
 
 type Response struct {
-	Data []FixedQuote `json:"data"`
+	Data []FixedQuote `json:"data, omitempty"`
+}
+
+func ReadQuantities() *Quantities {
+	quant := new(Quantities)
+	print("dbce-cli>> Type compute qty (default: 1): ")
+	fmt.Scanf("%s", &quant.Compute)
+	if strings.Compare(quant.Compute, "") == 0 {
+		quant.Compute = "1"
+	}
+
+	print("dbce-cli>> Type storage qty (default: 1): ")
+	fmt.Scanf("%s", &quant.Storage)
+	if strings.Compare(quant.Storage, "") == 0 {
+		quant.Storage = "1"
+	}
+
+	print("dbce-cli>> Type memory qty (default: 1): ")
+	fmt.Scanf("%s", &quant.Memory)
+	if strings.Compare(quant.Memory, "") == 0 {
+		quant.Memory = "1"
+	}
+
+	return quant
+}
+
+func ReadInterval() *Interval {
+	interval := new(Interval)
+	print("dbce-cli>> Type start date: ")
+	fmt.Scanf("%s", &interval.Start)
+	print("dbce-cli>> Type end date: ")
+	fmt.Scanf("%s", &interval.End)
+	return interval
+}
+
+func GetDefaultInterval() *Interval {
+	interval := new(Interval)
+
+	now := time.Now()
+
+	interval.Start = now.Format(time.RFC3339)
+	interval.End = now.Format(time.RFC3339)
+
+	return interval
 }
 
 func GetQuotesRequest(c *cli.Context) {
 
-	quant := Quantities{}
-	print("dbce-cli>> Type compute qty (empty): ")
-	fmt.Scanf("%s", &quant.Compute)
-	print("dbce-cli>> Type storage qty (empty): ")
-	fmt.Scanf("%s", &quant.Storage)
+	quant := ReadQuantities()
 
-	interval := Interval{}
-	print("dbce-cli>> Type start date (yesterday): ")
-	fmt.Scanf("%s", &interval.Start)
-	print("dbce-cli>> Type end date (today): ")
-	fmt.Scanf("%s", &interval.End)
+	var interval *Interval
+
+	print("dbce-cli>> Specify Interval [Default: yesterday-today] ? (Y/n) ")
+	var yn string
+	fmt.Scanf("%s", &yn)
+
+	if yn == "Y" || yn == "y" {
+		interval = ReadInterval()
+	} else {
+		interval = GetDefaultInterval()
+	}
 
 	filter := &FixedQuoteRequest{
 		Quantities: quant,
